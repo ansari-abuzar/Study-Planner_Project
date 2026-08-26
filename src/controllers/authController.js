@@ -1,6 +1,6 @@
 import prisma from "../config/db.js";
-import bcrypt, { genSalt } from "bcrypt";
-import jwt from "jsonwebtoken"
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 const registerUser = async (req, res) => {
   const { name, email, password } = req.body;
@@ -39,7 +39,7 @@ const registerUser = async (req, res) => {
   }
 
   // User Creation
-  const user = await prisma.user.create({
+  await prisma.user.create({
     data: {
       name,
       email,
