@@ -1,44 +1,25 @@
-import prisma from "../config/db.js";
+import {
+  getProfile as getProfileService,
+  updateProfile as updateProfileService,
+  deleteProfile as deleteProfileService,
+} from "../services/userServices.js";
 
 const getProfile = async (req, res) => {
-  const user = await prisma.user.findUnique({
-    where: {
-      id: req.userId,
-    },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      createdAt: true,
-      updatedAt: true,
-    },
-  });
+  const user = await getProfileService(req.userId);
+
   res.json({ user });
 };
 
 const updateProfile = async (req, res) => {
   const { name, email } = req.body;
-  const user = await prisma.user.update({
-    where: { id: req.userId },
-    data: {
-      name,
-      email,
-    },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      createdAt: true,
-      updatedAt: true,
-    },
-  });
+  const user = await updateProfileService(req.userId, name, email);
+
   res.json({ user });
 };
 
 const deleteProfile = async (req, res) => {
-  await prisma.user.delete({
-    where: { id: req.userId },
-  });
+  await deleteProfileService(req.userId);
+
   res.json({ message: "User deleted successfully." });
 };
 
