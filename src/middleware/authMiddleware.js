@@ -1,9 +1,10 @@
 import jwt from "jsonwebtoken";
+import AppError from "../utils/appError.js";
 
 const authMiddleware = (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
-    return res.status(401).json({ error: "No token provided." });
+    throw new AppError("No token provided.", 401);
   }
 
   const token = authHeader.split(" ")[1];
@@ -12,7 +13,7 @@ const authMiddleware = (req, res, next) => {
     req.userId = decoded.userId;
     next();
   } catch (error) {
-    return res.status(401).json({ error: "Invalid or expired token." });
+    throw new AppError("Invalid or expired token.", 401);
   }
 };
 
