@@ -11,7 +11,7 @@ import AppError from "../utils/appError.js";
 const createTask = async (req, res) => {
   const { title, description } = req.body;
 
-  if (!title) {
+  if (!title || title.trim()==="") {
     throw new AppError("Task title is required.", 400);
   }
 
