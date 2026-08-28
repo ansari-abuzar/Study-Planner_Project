@@ -12,12 +12,23 @@ const createTask = async (userId, title, description) => {
 };
 
 // Getting all the tasks of the user.
-const getTasks = async (userId) => {
-  return await prisma.task.findMany({
-    where: {
-      userId,
-    },
-  });
+const getTasks = async (userId, skip, limit) => {
+  const [tasks, taskCount] = await Promise.all([
+    prisma.task.findMany({
+      where: {
+        userId,
+      },
+      skip,
+      take: limit,
+    }),
+
+    prisma.task.count({
+      where: {
+        userId,
+      },
+    }),
+  ]);
+  return { tasks, taskCount };
 };
 
 // Getting a single task by its id.

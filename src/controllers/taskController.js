@@ -11,6 +11,10 @@ import AppError from "../utils/appError.js";
 const createTask = async (req, res) => {
   const { title, description } = req.body;
 
+  if (!title) {
+    throw new AppError("Task title is required.", 400);
+  }
+
   const task = await createTaskService(req.userId, title, description);
 
   res.status(201).json({
@@ -21,9 +25,40 @@ const createTask = async (req, res) => {
 
 // Getting all the tasks of the logged in user.
 const getTasks = async (req, res) => {
-  const tasks = await getTasksService(req.userId);
+  const { page = 1, limit = 10 } = req.query;
+  const pageNumber = Number(page);
+  const limitNumber = Number(limit);
 
-  res.status(200).json(tasks);
+  // Validatin the page and limit numbers.
+  if (
+    !Number.isInteger(pageNumber) ||
+    !Number.isInteger(limitNumber) ||
+    pageNumber < 1 ||
+    limitNumber < 1
+  ) {
+    throw new AppError("Page and limit must be positive integers.", 400);
+  }
+
+  if (limitNumber > 50) {
+    throw new AppError("Page Limit cannot be greater that 50!", 400);
+  }
+
+  const skip = (pageNumber - 1) * limitNumber;
+
+  const result = await getTasksService(req.userId, skip, limitNumber);
+
+  const totalPages = Math.ceil(result.taskCount / limitNumber);
+
+  res.status(200).json({
+    tasks: result.tasks,
+    pagination: {
+      pages: pageNumber,
+      limit: limitNumber,
+      totTasks: result.taskCount,
+      totalPages,
+    },
+  });
+  // Json always returns a single object.
 };
 
 // Getting a task by id.
@@ -41,7 +76,33 @@ const getTask = async (req, res) => {
 // Updating a task by id.
 const updateTask = async (req, res) => {
   const { id } = req.params;
-  const data = req.body;
+  const { title, description, completed } = req.body;
+
+  const data = {};
+
+  if (title !== undefined) {
+    if (title.trim() === "") {
+      throw new AppError("Title cannot be empty.", 400);
+    }
+
+    data.title = title;
+  }
+
+  if (description !== undefined) {
+    data.description = description;
+  }
+
+  if (completed !== undefined) {
+    if (typeof completed !== "boolean") {
+      throw new AppError("Completed must be a boolean.", 400);
+    }
+
+    data.completed = completed;
+  }
+
+  if (Object.keys(data).length === 0) {
+    throw new AppError("Please provide something to update.", 400);
+  }
 
   const result = await updateTaskService(req.userId, id, data);
 
@@ -56,7 +117,7 @@ const updateTask = async (req, res) => {
 const deleteTask = async (req, res) => {
   const { id } = req.params;
 
-  await deleteTaskService(req.userId, id);
+  const result = await deleteTaskService(req.userId, id);
 
   if (result.count === 0) {
     throw new AppError("Task not found!", 404);
