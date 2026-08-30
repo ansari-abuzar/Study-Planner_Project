@@ -16,7 +16,7 @@ const registerUser = async (req, res) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   if (!emailRegex.test(email)) {
-    throw new AppError("Please enter a valid email", 400);
+    throw new AppError("Please enter a valid email.", 400);
   }
 
   // Password lenght checker
