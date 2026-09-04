@@ -4,7 +4,7 @@ function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const responce = await fetch("http://localhost:5000/auth/register", {
+    const response = await fetch("http://localhost:5000/auth/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -16,8 +16,7 @@ function Register() {
       }),
     });
 
-    const data = await responce.json();
-    console.log(data);
+    console.log(response.status);
   };
 
   const [name, setName] = useState("");
